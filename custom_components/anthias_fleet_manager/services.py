@@ -23,6 +23,8 @@ SERVICE_DELETE_SCHEDULE_SLOT = "delete_schedule_slot"
 SERVICE_ADD_SLOT_ITEM = "add_slot_item"
 SERVICE_REMOVE_SLOT_ITEM = "remove_slot_item"
 SERVICE_TRIGGER_UPDATE = "trigger_update"
+SERVICE_UPDATE_SCHEDULE_SLOT = "update_schedule_slot"
+SERVICE_UPDATE_ASSET = "update_asset"
 
 
 def _get_coordinator(hass: HomeAssistant) -> AnthiasCoordinator:
@@ -45,6 +47,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                 "media_file_id": call.data["media_file_id"],
             }
         )
+        await coordinator.async_request_refresh()
 
     async def handle_create_asset(call: ServiceCall) -> None:
         """Handle create_asset service call."""
@@ -58,6 +61,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                 "mimetype": call.data["mimetype"],
             },
         )
+        await coordinator.async_request_refresh()
 
     async def handle_delete_asset(call: ServiceCall) -> None:
         """Handle delete_asset service call."""
@@ -66,6 +70,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             call.data["player_id"],
             call.data["asset_id"],
         )
+        await coordinator.async_request_refresh()
 
     async def handle_toggle_asset(call: ServiceCall) -> None:
         """Handle toggle_asset service call."""
@@ -77,6 +82,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                 "is_enabled": call.data["is_enabled"],
             },
         )
+        await coordinator.async_request_refresh()
 
     async def handle_create_schedule_slot(call: ServiceCall) -> None:
         """Handle create_schedule_slot service call."""
@@ -95,6 +101,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         await coordinator.api.async_create_schedule_slot(
             call.data["player_id"], data
         )
+        await coordinator.async_request_refresh()
 
     async def handle_delete_schedule_slot(call: ServiceCall) -> None:
         """Handle delete_schedule_slot service call."""
@@ -103,6 +110,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             call.data["player_id"],
             call.data["slot_id"],
         )
+        await coordinator.async_request_refresh()
 
     async def handle_add_slot_item(call: ServiceCall) -> None:
         """Handle add_slot_item service call."""
@@ -112,6 +120,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             call.data["slot_id"],
             call.data["asset_id"],
         )
+        await coordinator.async_request_refresh()
 
     async def handle_remove_slot_item(call: ServiceCall) -> None:
         """Handle remove_slot_item service call."""
@@ -121,11 +130,49 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             call.data["slot_id"],
             call.data["item_id"],
         )
+        await coordinator.async_request_refresh()
 
     async def handle_trigger_update(call: ServiceCall) -> None:
         """Handle trigger_update service call."""
         coordinator = _get_coordinator(hass)
         await coordinator.api.async_trigger_update(call.data["player_id"])
+        await coordinator.async_request_refresh()
+
+    async def handle_update_schedule_slot(call: ServiceCall) -> None:
+        """Handle update_schedule_slot service call."""
+        coordinator = _get_coordinator(hass)
+        data: dict = {}
+        if "name" in call.data:
+            data["name"] = call.data["name"]
+        if "start_time" in call.data:
+            data["start_time"] = str(call.data["start_time"])
+        if "end_time" in call.data:
+            data["end_time"] = str(call.data["end_time"])
+        if "days_of_week" in call.data:
+            days_str = call.data["days_of_week"]
+            data["days_of_week"] = [int(d.strip()) for d in days_str.split(",") if d.strip()]
+        await coordinator.api.async_update_schedule_slot(
+            call.data["player_id"],
+            call.data["slot_id"],
+            data,
+        )
+        await coordinator.async_request_refresh()
+
+    async def handle_update_asset(call: ServiceCall) -> None:
+        """Handle update_asset service call."""
+        coordinator = _get_coordinator(hass)
+        data: dict = {"asset_id": call.data["asset_id"]}
+        if "name" in call.data:
+            data["name"] = call.data["name"]
+        if "duration" in call.data:
+            data["duration"] = str(call.data["duration"])
+        if "is_enabled" in call.data:
+            data["is_enabled"] = call.data["is_enabled"]
+        await coordinator.api.async_update_asset(
+            call.data["player_id"],
+            data,
+        )
+        await coordinator.async_request_refresh()
 
     hass.services.async_register(
         DOMAIN,
@@ -248,6 +295,37 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         ),
     )
 
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_UPDATE_SCHEDULE_SLOT,
+        handle_update_schedule_slot,
+        schema=vol.Schema(
+            {
+                vol.Required("player_id"): cv.string,
+                vol.Required("slot_id"): cv.string,
+                vol.Optional("name"): cv.string,
+                vol.Optional("start_time"): cv.string,
+                vol.Optional("end_time"): cv.string,
+                vol.Optional("days_of_week"): cv.string,
+            }
+        ),
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_UPDATE_ASSET,
+        handle_update_asset,
+        schema=vol.Schema(
+            {
+                vol.Required("player_id"): cv.string,
+                vol.Required("asset_id"): cv.string,
+                vol.Optional("name"): cv.string,
+                vol.Optional("duration"): vol.Coerce(int),
+                vol.Optional("is_enabled"): cv.boolean,
+            }
+        ),
+    )
+
 
 async def async_unload_services(hass: HomeAssistant) -> None:
     """Unload Anthias Fleet Manager services."""
@@ -261,5 +339,7 @@ async def async_unload_services(hass: HomeAssistant) -> None:
         SERVICE_ADD_SLOT_ITEM,
         SERVICE_REMOVE_SLOT_ITEM,
         SERVICE_TRIGGER_UPDATE,
+        SERVICE_UPDATE_SCHEDULE_SLOT,
+        SERVICE_UPDATE_ASSET,
     ):
         hass.services.async_remove(DOMAIN, service)

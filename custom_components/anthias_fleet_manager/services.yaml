@@ -219,3 +219,82 @@ trigger_update:
       required: true
       selector:
         text:
+
+update_schedule_slot:
+  name: Update Schedule Slot
+  description: Update an existing schedule slot on a player.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    slot_id:
+      name: Slot ID
+      description: UUID of the schedule slot to update.
+      required: true
+      selector:
+        text:
+    name:
+      name: Slot Name
+      description: New display name for the slot.
+      required: false
+      selector:
+        text:
+    start_time:
+      name: Start Time
+      description: New start time (for time slots).
+      required: false
+      selector:
+        time:
+    end_time:
+      name: End Time
+      description: New end time (for time slots).
+      required: false
+      selector:
+        time:
+    days_of_week:
+      name: Days of Week
+      description: "Days when slot is active (1=Mon...7=Sun). Comma-separated, e.g. '1,2,3,4,5'."
+      required: false
+      selector:
+        text:
+
+update_asset:
+  name: Update Asset
+  description: Update an asset on a player (name, duration, enabled state).
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    asset_id:
+      name: Asset ID
+      description: UUID of the asset to update.
+      required: true
+      selector:
+        text:
+    name:
+      name: Asset Name
+      description: New display name for the asset.
+      required: false
+      selector:
+        text:
+    duration:
+      name: Duration
+      description: New display duration in seconds.
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 86400
+          unit_of_measurement: seconds
+    is_enabled:
+      name: Enabled
+      description: Whether the asset should be enabled.
+      required: false
+      selector:
+        boolean:

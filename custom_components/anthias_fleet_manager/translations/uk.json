@@ -101,6 +101,29 @@
       "fields": {
         "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." }
       }
+    },
+    "update_schedule_slot": {
+      "name": "Оновити слот розкладу",
+      "description": "Оновити існуючий слот розкладу на плеєрі.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "slot_id": { "name": "ID слоту", "description": "UUID слоту розкладу для оновлення." },
+        "name": { "name": "Назва слоту", "description": "Нова відображувана назва слоту." },
+        "start_time": { "name": "Час початку", "description": "Новий час початку (для часових слотів)." },
+        "end_time": { "name": "Час завершення", "description": "Новий час завершення (для часових слотів)." },
+        "days_of_week": { "name": "Дні тижня", "description": "Дні активності слоту (1=Пн...7=Нд, через кому)." }
+      }
+    },
+    "update_asset": {
+      "name": "Оновити ассет",
+      "description": "Оновити ассет на плеєрі (назва, тривалість, стан).",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "asset_id": { "name": "ID ассету", "description": "UUID ассету для оновлення." },
+        "name": { "name": "Назва ассету", "description": "Нова відображувана назва ассету." },
+        "duration": { "name": "Тривалість", "description": "Нова тривалість показу в секундах." },
+        "is_enabled": { "name": "Увімкнено", "description": "Чи має бути ассет увімкнений." }
+      }
     }
   }
 }

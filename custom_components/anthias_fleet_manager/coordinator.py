@@ -35,6 +35,7 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             "now_playing": { ... },
             "schedule_slots": [ ... ],
             "schedule_status": { ... },
+            "assets": [ ... ],
         }
     }
     """
@@ -57,6 +58,7 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         self.api = api
         self._media_cache: list[dict] = []
         self._media_cache_ts: float = 0
+        self._media_files_data: list[dict] = []
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         """Fetch players + info from FM."""
@@ -81,6 +83,7 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
                 "now_playing": None,
                 "schedule_slots": [],
                 "schedule_status": {},
+                "assets": [],
             }
 
             # Use last_status from player list (already has CPU, memory, disk, uptime)
@@ -122,7 +125,19 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
                         "Could not fetch schedule status for player %s", pid
                     )
 
+                try:
+                    assets = await self.api.async_get_assets(pid)
+                    entry["assets"] = assets
+                except AnthiasApiError:
+                    _LOGGER.debug("Could not fetch assets for player %s", pid)
+
             result[pid] = entry
+
+        # Refresh media files cache for Content Library sensor
+        try:
+            self._media_files_data = await self.async_get_media_files()
+        except AnthiasApiError:
+            _LOGGER.debug("Could not fetch media files from FM library")
 
         return result
 

@@ -101,6 +101,29 @@
       "fields": {
         "player_id": { "name": "Player ID", "description": "UUID of the target player." }
       }
+    },
+    "update_schedule_slot": {
+      "name": "Update Schedule Slot",
+      "description": "Update an existing schedule slot on a player.",
+      "fields": {
+        "player_id": { "name": "Player ID", "description": "UUID of the target player." },
+        "slot_id": { "name": "Slot ID", "description": "UUID of the schedule slot to update." },
+        "name": { "name": "Slot Name", "description": "New display name for the slot." },
+        "start_time": { "name": "Start Time", "description": "New start time (for time slots)." },
+        "end_time": { "name": "End Time", "description": "New end time (for time slots)." },
+        "days_of_week": { "name": "Days of Week", "description": "Days when slot is active (1=Mon...7=Sun, comma-separated)." }
+      }
+    },
+    "update_asset": {
+      "name": "Update Asset",
+      "description": "Update an asset on a player (name, duration, enabled state).",
+      "fields": {
+        "player_id": { "name": "Player ID", "description": "UUID of the target player." },
+        "asset_id": { "name": "Asset ID", "description": "UUID of the asset to update." },
+        "name": { "name": "Asset Name", "description": "New display name for the asset." },
+        "duration": { "name": "Duration", "description": "New display duration in seconds." },
+        "is_enabled": { "name": "Enabled", "description": "Whether the asset should be enabled." }
+      }
     }
   }
 }

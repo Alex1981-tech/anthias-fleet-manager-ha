@@ -159,9 +159,27 @@ def _active_slot_extra_attrs(player: dict) -> dict[str, Any]:
     slots = player.get("schedule_slots", [])
     status = player.get("schedule_status", {})
     active = status.get("current_slot") or {}
+    structured_slots = []
+    for s in slots:
+        slot_entry: dict[str, Any] = {
+            "id": s.get("id"),
+            "name": s.get("name", ""),
+            "type": s.get("slot_type", ""),
+            "is_default": s.get("is_default", False),
+            "start_time": s.get("start_time"),
+            "end_time": s.get("end_time"),
+        }
+        items = []
+        for item in s.get("items", []):
+            items.append({
+                "item_id": item.get("id"),
+                "asset_id": item.get("asset_id") or item.get("asset", {}).get("id"),
+                "asset_name": item.get("asset_name") or item.get("asset", {}).get("name", ""),
+            })
+        slot_entry["items"] = items
+        structured_slots.append(slot_entry)
     return {
-        "slot_names": [s.get("name", "") for s in slots],
-        "slot_types": [s.get("slot_type", "") for s in slots],
+        "slots": structured_slots,
         "active_slot_id": active.get("slot_id"),
         "active_slot_type": active.get("slot_type"),
     }
@@ -169,6 +187,26 @@ def _active_slot_extra_attrs(player: dict) -> dict[str, Any]:
 
 def _schedule_slot_count(player: dict) -> int:
     return len(player.get("schedule_slots", []))
+
+
+def _asset_count(player: dict) -> int:
+    return len(player.get("assets", []))
+
+
+def _asset_count_extra_attrs(player: dict) -> dict[str, Any]:
+    assets = player.get("assets", [])
+    return {
+        "assets": [
+            {
+                "id": a.get("asset_id", a.get("id")),
+                "name": a.get("name", ""),
+                "mimetype": a.get("mimetype", ""),
+                "is_enabled": a.get("is_enabled", True),
+                "duration": a.get("duration"),
+            }
+            for a in assets
+        ],
+    }
 
 
 SCHEDULE_SENSOR_DESCRIPTIONS: tuple[AnthiasScheduleSensorDescription, ...] = (
@@ -183,6 +221,13 @@ SCHEDULE_SENSOR_DESCRIPTIONS: tuple[AnthiasScheduleSensorDescription, ...] = (
         icon="mdi:calendar-multiple",
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=_schedule_slot_count,
+    ),
+    AnthiasScheduleSensorDescription(
+        key="asset_count",
+        icon="mdi:filmstrip-box-multiple",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_asset_count,
+        extra_attrs_fn=_asset_count_extra_attrs,
     ),
 )
 
@@ -205,6 +250,8 @@ async def async_setup_entry(
         for player_id in coordinator.data
         for desc in SCHEDULE_SENSOR_DESCRIPTIONS
     )
+    # Content Library sensor (one per FM hub, not per player)
+    entities.append(AnthiasContentLibrarySensor(coordinator, entry))
     async_add_entities(entities)
 
 
@@ -310,3 +357,51 @@ class AnthiasScheduleSensor(CoordinatorEntity[AnthiasCoordinator], SensorEntity)
             return False
         player = self.coordinator.data.get(self._player_id)
         return player is not None and player.get("is_online", False)
+
+
+class AnthiasContentLibrarySensor(CoordinatorEntity[AnthiasCoordinator], SensorEntity):
+    """Sensor entity for FM content library (one per hub)."""
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: AnthiasCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        super().__init__(coordinator)
+        self._entry_id = entry.entry_id
+        self._attr_unique_id = f"{entry.entry_id}_content_library"
+        self._attr_name = "Content Library"
+        self._attr_icon = "mdi:multimedia"
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self._entry_id)},
+            "name": "Anthias Fleet Manager",
+            "manufacturer": "Anthias",
+            "model": "Fleet Manager",
+        }
+
+    @property
+    def native_value(self) -> int:
+        return len(self.coordinator._media_files_data)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            "files": [
+                {
+                    "id": f.get("id"),
+                    "name": f.get("name", ""),
+                    "file_type": f.get("file_type", ""),
+                }
+                for f in self.coordinator._media_files_data
+            ],
+        }
+
+    @property
+    def available(self) -> bool:
+        return self.coordinator.last_update_success
