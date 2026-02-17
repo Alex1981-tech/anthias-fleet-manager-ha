@@ -149,7 +149,7 @@ class AnthiasScheduleSensorDescription(SensorEntityDescription):
 
 def _active_schedule_slot(player: dict) -> str | None:
     status = player.get("schedule_status", {})
-    active = status.get("active_slot")
+    active = status.get("current_slot")
     if active and isinstance(active, dict):
         return active.get("name", "Unknown")
     return None
@@ -158,11 +158,11 @@ def _active_schedule_slot(player: dict) -> str | None:
 def _active_slot_extra_attrs(player: dict) -> dict[str, Any]:
     slots = player.get("schedule_slots", [])
     status = player.get("schedule_status", {})
-    active = status.get("active_slot") or {}
+    active = status.get("current_slot") or {}
     return {
         "slot_names": [s.get("name", "") for s in slots],
         "slot_types": [s.get("slot_type", "") for s in slots],
-        "active_slot_id": active.get("id"),
+        "active_slot_id": active.get("slot_id"),
         "active_slot_type": active.get("slot_type"),
     }
 
