@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from datetime import timedelta
 from typing import Any
 
@@ -16,6 +17,8 @@ from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+MEDIA_CACHE_TTL = 300  # 5 minutes
+
 
 class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
     """Coordinator that polls FM for player data.
@@ -27,19 +30,11 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             "name": "...",
             "is_online": True/False,
             "last_seen": "...",
-            "info": {  # only for online players
-                "cpu_temp": 48.3,
-                "cpu_usage": 12,
-                "memory": {"total": 7820, "used": 970, ...},
-                "disk_usage": {"total_gb": 28.8, "free_gb": 20.1, ...},
-                "uptime": {"days": 2, "hours": 5.3},
-                "anthias_version": "v1.3.1@beff593",
-                "device_model": "Raspberry Pi 4 Model B Rev 1.5",
-            },
-            "cec": {  # only if CEC available
-                "cec_available": True,
-                "tv_on": True/False,
-            },
+            "info": { ... },
+            "cec": { ... },
+            "now_playing": { ... },
+            "schedule_slots": [ ... ],
+            "schedule_status": { ... },
         }
     }
     """
@@ -60,6 +55,8 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
         )
         self.api = api
+        self._media_cache: list[dict] = []
+        self._media_cache_ts: float = 0
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         """Fetch players + info from FM."""
@@ -81,6 +78,9 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
                 "last_seen": player.get("last_seen"),
                 "info": {},
                 "cec": {},
+                "now_playing": None,
+                "schedule_slots": [],
+                "schedule_status": {},
             }
 
             # Use last_status from player list (already has CPU, memory, disk, uptime)
@@ -88,7 +88,7 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             if last_status:
                 entry["info"] = last_status
 
-            # For online players, also fetch live info and CEC
+            # For online players, also fetch live info, CEC, and schedule
             if entry["is_online"]:
                 try:
                     info = await self.api.async_get_player_info(pid)
@@ -102,6 +102,35 @@ class AnthiasCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
                 except AnthiasApiError:
                     _LOGGER.debug("Could not fetch CEC status for player %s", pid)
 
+                try:
+                    now_playing = await self.api.async_get_now_playing(pid)
+                    entry["now_playing"] = now_playing
+                except AnthiasApiError:
+                    _LOGGER.debug("Could not fetch now-playing for player %s", pid)
+
+                try:
+                    slots = await self.api.async_get_schedule_slots(pid)
+                    entry["schedule_slots"] = slots
+                except AnthiasApiError:
+                    _LOGGER.debug("Could not fetch schedule slots for player %s", pid)
+
+                try:
+                    status = await self.api.async_get_schedule_status(pid)
+                    entry["schedule_status"] = status
+                except AnthiasApiError:
+                    _LOGGER.debug(
+                        "Could not fetch schedule status for player %s", pid
+                    )
+
             result[pid] = entry
 
         return result
+
+    async def async_get_media_files(self) -> list[dict]:
+        """Get media files from FM content library (cached 5 min)."""
+        now = time.monotonic()
+        if now - self._media_cache_ts < MEDIA_CACHE_TTL and self._media_cache:
+            return self._media_cache
+        self._media_cache = await self.api.async_get_media_files()
+        self._media_cache_ts = now
+        return self._media_cache

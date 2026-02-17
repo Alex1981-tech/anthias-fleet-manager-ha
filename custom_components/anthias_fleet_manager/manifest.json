@@ -1,7 +1,7 @@
 {
   "domain": "anthias_fleet_manager",
   "name": "Anthias Fleet Manager",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "documentation": "https://github.com/Alex1981-tech/anthias-fleet-manager-ha",
   "issue_tracker": "https://github.com/Alex1981-tech/anthias-fleet-manager-ha/issues",
   "codeowners": ["@Alex1981-tech"],

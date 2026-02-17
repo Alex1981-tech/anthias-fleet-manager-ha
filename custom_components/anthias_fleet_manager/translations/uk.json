@@ -19,5 +19,88 @@
     "abort": {
       "already_configured": "Цей Fleet Manager вже налаштований"
     }
+  },
+  "services": {
+    "deploy_content": {
+      "name": "Розгорнути контент",
+      "description": "Розгорнути медіафайл з бібліотеки Fleet Manager на плеєр.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "media_file_id": { "name": "ID медіафайлу", "description": "UUID медіафайлу в бібліотеці FM." }
+      }
+    },
+    "create_asset": {
+      "name": "Створити ассет",
+      "description": "Створити URL-ассет на плеєрі.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "name": { "name": "Назва ассету", "description": "Відображувана назва ассету." },
+        "uri": { "name": "URI", "description": "URL контенту." },
+        "duration": { "name": "Тривалість", "description": "Тривалість показу в секундах." },
+        "mimetype": { "name": "MIME тип", "description": "Тип контенту (webpage, image, video)." }
+      }
+    },
+    "delete_asset": {
+      "name": "Видалити ассет",
+      "description": "Видалити ассет з плеєра.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "asset_id": { "name": "ID ассету", "description": "UUID ассету для видалення." }
+      }
+    },
+    "toggle_asset": {
+      "name": "Перемкнути ассет",
+      "description": "Увімкнути або вимкнути ассет на плеєрі.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "asset_id": { "name": "ID ассету", "description": "UUID ассету." },
+        "is_enabled": { "name": "Увімкнено", "description": "Чи має бути ассет увімкнений." }
+      }
+    },
+    "create_schedule_slot": {
+      "name": "Створити слот розкладу",
+      "description": "Створити новий слот розкладу на плеєрі.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "slot_type": { "name": "Тип слоту", "description": "Тип слоту розкладу." },
+        "name": { "name": "Назва слоту", "description": "Відображувана назва слоту." },
+        "start_time": { "name": "Час початку", "description": "Час початку (для часових слотів)." },
+        "end_time": { "name": "Час завершення", "description": "Час завершення (для часових слотів)." },
+        "days_of_week": { "name": "Дні тижня", "description": "Дні активності слоту (1=Пн...7=Нд, через кому)." }
+      }
+    },
+    "delete_schedule_slot": {
+      "name": "Видалити слот розкладу",
+      "description": "Видалити слот розкладу з плеєра.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "slot_id": { "name": "ID слоту", "description": "UUID слоту розкладу для видалення." }
+      }
+    },
+    "add_slot_item": {
+      "name": "Додати елемент до слоту",
+      "description": "Додати ассет до слоту розкладу.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "slot_id": { "name": "ID слоту", "description": "UUID слоту розкладу." },
+        "asset_id": { "name": "ID ассету", "description": "UUID ассету для додавання." }
+      }
+    },
+    "remove_slot_item": {
+      "name": "Видалити елемент зі слоту",
+      "description": "Видалити елемент зі слоту розкладу.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." },
+        "slot_id": { "name": "ID слоту", "description": "UUID слоту розкладу." },
+        "item_id": { "name": "ID елементу", "description": "UUID елементу слоту для видалення." }
+      }
+    },
+    "trigger_update": {
+      "name": "Оновити плеєр",
+      "description": "Запустити оновлення програмного забезпечення плеєра через Watchtower.",
+      "fields": {
+        "player_id": { "name": "ID плеєра", "description": "UUID цільового плеєра." }
+      }
+    }
   }
 }

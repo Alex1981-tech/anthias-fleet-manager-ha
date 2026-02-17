@@ -1,0 +1,221 @@
+deploy_content:
+  name: Deploy Content
+  description: Deploy media file from Fleet Manager library to a player.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    media_file_id:
+      name: Media File ID
+      description: UUID of the media file in FM content library.
+      required: true
+      selector:
+        text:
+
+create_asset:
+  name: Create Asset
+  description: Create a URL-based asset on a player.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    name:
+      name: Asset Name
+      description: Display name for the asset.
+      required: true
+      selector:
+        text:
+    uri:
+      name: URI
+      description: URL of the content (web page, image, or video URL).
+      required: true
+      selector:
+        text:
+    duration:
+      name: Duration
+      description: Display duration in seconds.
+      required: true
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 86400
+          unit_of_measurement: seconds
+    mimetype:
+      name: MIME Type
+      description: Content type of the asset.
+      required: true
+      default: "webpage"
+      selector:
+        select:
+          options:
+            - "webpage"
+            - "image"
+            - "video"
+
+delete_asset:
+  name: Delete Asset
+  description: Delete an asset from a player.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    asset_id:
+      name: Asset ID
+      description: UUID of the asset to delete.
+      required: true
+      selector:
+        text:
+
+toggle_asset:
+  name: Toggle Asset
+  description: Enable or disable an asset on a player.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    asset_id:
+      name: Asset ID
+      description: UUID of the asset.
+      required: true
+      selector:
+        text:
+    is_enabled:
+      name: Enabled
+      description: Whether the asset should be enabled.
+      required: true
+      default: true
+      selector:
+        boolean:
+
+create_schedule_slot:
+  name: Create Schedule Slot
+  description: Create a new schedule slot on a player.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    slot_type:
+      name: Slot Type
+      description: Type of schedule slot.
+      required: true
+      default: "default"
+      selector:
+        select:
+          options:
+            - "default"
+            - "time"
+            - "event"
+    name:
+      name: Slot Name
+      description: Display name for the slot.
+      required: true
+      selector:
+        text:
+    start_time:
+      name: Start Time
+      description: Start time (for time slots).
+      required: false
+      selector:
+        time:
+    end_time:
+      name: End Time
+      description: End time (for time slots).
+      required: false
+      selector:
+        time:
+    days_of_week:
+      name: Days of Week
+      description: "Days when slot is active (1=Mon...7=Sun). Comma-separated, e.g. '1,2,3,4,5'."
+      required: false
+      selector:
+        text:
+
+delete_schedule_slot:
+  name: Delete Schedule Slot
+  description: Delete a schedule slot from a player.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    slot_id:
+      name: Slot ID
+      description: UUID of the schedule slot to delete.
+      required: true
+      selector:
+        text:
+
+add_slot_item:
+  name: Add Slot Item
+  description: Add an asset to a schedule slot.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    slot_id:
+      name: Slot ID
+      description: UUID of the schedule slot.
+      required: true
+      selector:
+        text:
+    asset_id:
+      name: Asset ID
+      description: UUID of the asset to add.
+      required: true
+      selector:
+        text:
+
+remove_slot_item:
+  name: Remove Slot Item
+  description: Remove an item from a schedule slot.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
+    slot_id:
+      name: Slot ID
+      description: UUID of the schedule slot.
+      required: true
+      selector:
+        text:
+    item_id:
+      name: Item ID
+      description: UUID of the slot item to remove.
+      required: true
+      selector:
+        text:
+
+trigger_update:
+  name: Trigger Player Update
+  description: Trigger a software update on a player via Watchtower.
+  fields:
+    player_id:
+      name: Player ID
+      description: UUID of the target player.
+      required: true
+      selector:
+        text:
