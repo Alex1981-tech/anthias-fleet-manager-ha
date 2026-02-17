@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Підключення до Anthias Fleet Manager",
+        "description": "Введіть URL та облікові дані вашого Fleet Manager.",
+        "data": {
+          "url": "URL Fleet Manager",
+          "username": "Ім'я користувача",
+          "password": "Пароль"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Не вдалося з'єднатися з Fleet Manager",
+      "invalid_auth": "Невірне ім'я користувача або пароль",
+      "unknown": "Неочікувана помилка"
+    },
+    "abort": {
+      "already_configured": "Цей Fleet Manager вже налаштований"
+    }
+  }
+}

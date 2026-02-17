@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Anthias Fleet Manager",
+        "description": "Enter the URL and credentials for your Fleet Manager instance.",
+        "data": {
+          "url": "Fleet Manager URL",
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to Fleet Manager",
+      "invalid_auth": "Invalid username or password",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This Fleet Manager is already configured"
+    }
+  }
+}
